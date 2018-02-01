@@ -25,6 +25,7 @@ public class JDBCEntitySchemaDAO implements EntitySchemaDAO{
 		ApplicationContext context = new ClassPathXmlApplicationContext("Spring-Module.xml");
 		DataSource dataSource = (DataSource) context.getBean("dataSource");
 		this.dataSource = dataSource;
+		
 	}
 
 	@Override
@@ -91,7 +92,27 @@ public class JDBCEntitySchemaDAO implements EntitySchemaDAO{
 	@Override
 	public EntitySchema delete(String name) {
 		// TODO Auto-generated method stub
-		return null;
+		String sql = "DELETE FROM entity_schema WHERE name = ?";
+
+		Connection conn = null;
+
+		try {
+			EntitySchema entitySchema = get(name);
+			conn = dataSource.getConnection();
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, name);
+			ps.execute();
+			ps.close();
+			return entitySchema;
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (conn != null) {
+				try {
+				conn.close();
+				} catch (SQLException e) {}
+			}
+		}
 	}
 
 	@Override
