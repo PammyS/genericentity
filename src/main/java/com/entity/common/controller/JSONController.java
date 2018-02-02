@@ -1,6 +1,7 @@
 package com.entity.common.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,6 +14,9 @@ import com.entity.common.dao.impl.JDBCGenericEntityDAO;
 import com.entity.common.model.CustomResponse;
 import com.entity.common.model.EntitySchema;
 import com.entity.common.model.GenericEntity;
+
+
+
 
 @Controller
 @RequestMapping("/entity")
@@ -40,6 +44,13 @@ public class JSONController {
 		return schema;
 	}
 	
+	@RequestMapping(value = "/entity-schema/update", method = RequestMethod.POST)
+	public @ResponseBody CustomResponse updateSchema(@RequestBody EntitySchema schema) {
+		EntitySchemaDAO entitySchemaDAO = new JDBCEntitySchemaDAO();
+		String schemaName = entitySchemaDAO.update(schema);		
+		CustomResponse resp = new CustomResponse(true, schemaName)  ;
+		return resp;
+	}	
 	
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public @ResponseBody CustomResponse createEntity(@RequestBody GenericEntity entity) {
@@ -54,6 +65,14 @@ public class JSONController {
 		GenericEntityDAO entityDAO = new JDBCGenericEntityDAO();
 		GenericEntity entity = entityDAO.get(id);		
 		return entity;
+	}
+	
+	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
+	public @ResponseBody CustomResponse updateEntity(@RequestBody GenericEntity entity,@PathVariable(value="id") String id) {
+		GenericEntityDAO entityDAO = new JDBCGenericEntityDAO();
+		String new_id = entityDAO.update(entity, id);
+		CustomResponse resp = new CustomResponse(true, new_id)  ;
+		return resp;
 	}
 
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)

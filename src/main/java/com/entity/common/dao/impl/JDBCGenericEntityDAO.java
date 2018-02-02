@@ -8,14 +8,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
 import javax.sql.DataSource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -143,9 +148,23 @@ public class JDBCGenericEntityDAO implements GenericEntityDAO {
 	}
 
 	@Override
-	public GenericEntity update(GenericEntity genericEntity, String id) {
+	public String update(GenericEntity genericEntity, String id) {
 		// TODO Auto-generated method stub
-		return null;
+		GenericEntity oldEntity = get(id);
+		String new_id = null;
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			Map<String, Object> map1 = mapper.readValue(oldEntity.getJson_data(), Map.class);
+			Map<String, Object> map2 = mapper.readValue(genericEntity.getJson_data(), Map.class);
+			Map<String, Object> merged = new HashMap<String, Object>(map1);
+			merged.putAll(map2);
+			GenericEntity updatedEntity = new GenericEntity(genericEntity.getEntity_name(), mapper.writeValueAsString(merged));
+			new_id = insert(updatedEntity).toString();
+			delete(id);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return new_id;
 	}
 
 	GenericData.Record parseJson(String json, String schema) throws IOException, Exception {

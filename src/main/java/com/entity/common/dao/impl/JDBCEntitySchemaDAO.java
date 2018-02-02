@@ -116,9 +116,10 @@ public class JDBCEntitySchemaDAO implements EntitySchemaDAO{
 	}
 
 	@Override
-	public EntitySchema update(EntitySchema entitySchema, String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public String update(EntitySchema entitySchema) {
+		String name = entitySchema.getName();
+		delete(name);
+		return insert(entitySchema);	
 	}
 	
 
